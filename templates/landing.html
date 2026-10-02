@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PivotSpend</title>
+    <style>
+        :root {
+            --bg: #0f1419;
+            --surface: #1a2128;
+            --border: #2d3640;
+            --text: #e4e9ee;
+            --text-dim: #8b96a3;
+            --orange: #e2883f;
+            --orange-dim: #c06f2d;
+            --expense: #5b9bd5;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 48px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        nav .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        nav .logo span { color: var(--orange); }
+
+        nav .links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 14px;
+            margin-left: 24px;
+        }
+
+        nav .links a.btn {
+            background: var(--orange);
+            color: #0f1419;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        nav .links a.btn:hover {
+            background: var(--orange-dim);
+        }
+
+        .hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 700;
+            max-width: 600px;
+            line-height: 1.3;
+            color: #c9a876;
+        }
+
+        .hero h1 span { color: #e8c27e; }
+
+        .hero p {
+            color: #a3b8c2;
+            font-size: 16px;
+            margin-top: 16px;
+            max-width: 480px;
+        }
+
+        .hero .cta {
+            margin-top: 32px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .btn-primary {
+            background: var(--orange);
+            color: #0f1419;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .btn-primary:hover {
+            background: var(--orange-dim);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text);
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 15px;
+            border: 1px solid var(--border);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 900px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .feature-card h3 {
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            color: var(--text-dim);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">Pivot<span>Spend</span></div>
+        <div class="links">
+            <a href="/login">Log in</a>
+            <a href="/signup" class="btn">Sign up</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Take <span>responsibility</span> of your expenditure.</h1>
+        <p>Be accountable for every penny — track income, expenses, and budgets in one clean dashboard.</p>
+        <div class="cta">
+            <a href="/signup" class="btn-primary">Get Started Free</a>
+            <a href="/login" class="btn-secondary">Log In</a>
+        </div>
+    </div>
+
+    <div class="features">
+        <div class="feature-card">
+            <h3>Track Everything</h3>
+            <p>Log income and expenses in seconds, with categories to keep things organized.</p>
+        </div>
+        <div class="feature-card">
+            <h3>See Your Balance</h3>
+            <p>A live summary of income, expenses, and balance, always up to date.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Stay On Budget</h3>
+            <p>Set a monthly budget and get warned the moment you go over.</p>
+        </div>
+    </div>
+</body>
+</html> 

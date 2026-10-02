@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PivotSpend</title>
+    <style>
+        :root {
+            --bg: #0f1419;
+            --surface: #1a2128;
+            --surface-light: #232b33;
+            --border: #2d3640;
+            --text: #e4e9ee;
+            --text-dim: #8b96a3;
+            --accent: #3ecf8e;
+            --accent-dim: #2a8f63;
+            --expense: #5b9bd5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 32px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        header p {
+            color: var(--text-dim);
+            margin-top: 4px;
+            font-size: 14px;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .card .label {
+            color: var(--text-dim);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .card .value {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .card.balance .value { color: var(--accent); }
+        .card.expense .value { color: var(--expense); }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .panel h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .field label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        button {
+            background: var(--accent);
+            color: #0f1419;
+            border: none;
+            border-radius: 8px;
+            padding: 11px 20px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: var(--accent-dim);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            font-size: 12px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 12px 8px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .tag.income {
+            background: rgba(62, 207, 142, 0.15);
+            color: var(--accent);
+        }
+
+        .tag.expense {
+            background: rgba(91, 155, 213, 0.15);
+            color: var(--expense);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Expense Tracker</h1>
+            <p>Know exactly where your money goes.</p>
+        </header>
+
+        <div class="summary">
+            <div class="card balance">
+                <div class="label">Balance</div>
+                <div class="value">₦0.00</div>
+            </div>
+            <div class="card">
+                <div class="label">Total Income</div>
+                <div class="value">₦0.00</div>
+            </div>
+            <div class="card expense">
+                <div class="label">Total Expenses</div>
+                <div class="value">₦0.00</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Add Transaction</h2>
+            <form>
+                <div class="field">
+                    <label>Type</label>
+                    <select>
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Amount</label>
+                    <input type="number" placeholder="0.00">
+                </div>
+                <div class="field">
+                    <label>Description</label>
+                    <input type="text" placeholder="e.g. Groceries">
+                </div>
+                <button type="submit">Add</button>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h2>All Transactions</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="tag income">Income</span></td>
+                        <td>₦150,000.00</td>
+                        <td>Stipend</td>
+                        <td>2026-10-02</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

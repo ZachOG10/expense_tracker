@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up — PivotSpend</title>
+    <style>
+        :root {
+            --bg: #0f1419;
+            --surface: #1a2128;
+            --surface-light: #232b33;
+            --border: #2d3640;
+            --text: #e4e9ee;
+            --text-dim: #8b96a3;
+            --accent: #3ecf8e;
+            --accent-dim: #2a8f63;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .signup-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .signup-box h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .signup-box .accent { color: var(--accent); }
+
+        .signup-box p.subtitle {
+            color: var(--text-dim);
+            font-size: 13px;
+            margin-bottom: 28px;
+        }
+
+        .name-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .field { margin-bottom: 18px; }
+
+        .field label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+        }
+
+        .field input {
+            width: 100%;
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .field input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        button {
+            width: 100%;
+            background: var(--accent);
+            color: #0f1419;
+            border: none;
+            border-radius: 8px;
+            padding: 13px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        button:hover { background: var(--accent-dim); }
+
+        .footer-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        .footer-link a { color: var(--accent); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="signup-box">
+        <h1>Create your <span class="accent">account</span></h1>
+        <p class="subtitle">Start tracking your money in under a minute.</p>
+
+        <form method="POST" action="/signup">
+            <div class="name-row">
+                <div class="field">
+                    <label>Surname</label>
+                    <input type="text" name="surname" placeholder="Doe" required>
+                </div>
+                <div class="field">
+                    <label>Middle Name</label>
+                    <input type="text" name="middle_name" placeholder="Optional">
+                </div>
+                <div class="field">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" placeholder="Zachariah" required>
+                </div>
+            </div>
+            <div class="field">
+                <label>Email</label>
+                <input type="email" name="email" placeholder="you@example.com" required>
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit">Sign Up</button>
+        </form>
+
+        <div class="footer-link">
+            Already have an account? <a href="/login">Log in</a>
+        </div>
+    </div>
+</body>
+</html>
