@@ -51,6 +51,16 @@
             margin-bottom: 28px;
         }
 
+        .error {
+            background: rgba(91, 155, 213, 0.12);
+            border: 1px solid #5b9bd5;
+            color: #5b9bd5;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            margin-bottom: 18px;
+        }
+
         .name-row {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -110,6 +120,10 @@
     <div class="signup-box">
         <h1>Create your <span class="accent">account</span></h1>
         <p class="subtitle">Start tracking your money in under a minute.</p>
+
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
 
         <form method="POST" action="/signup">
             <div class="name-row">

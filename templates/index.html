@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PivotSpend</title>
+    <title>Dashboard — PivotSpend</title>
     <style>
         :root {
             --bg: #0f1419;
@@ -16,11 +16,7 @@
             --expense: #5b9bd5;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background: var(--bg);
@@ -29,25 +25,33 @@
             padding: 40px 20px;
         }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
+        .container { max-width: 900px; margin: 0 auto; }
 
         header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
             margin-bottom: 32px;
         }
 
-        header h1 {
-            font-size: 28px;
-            font-weight: 600;
-        }
+        header h1 { font-size: 28px; font-weight: 600; }
 
         header p {
             color: var(--text-dim);
             margin-top: 4px;
             font-size: 14px;
         }
+
+        .logout {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 16px;
+        }
+
+        .logout:hover { color: var(--text); border-color: var(--text-dim); }
 
         .summary {
             display: grid;
@@ -71,11 +75,7 @@
             margin-bottom: 8px;
         }
 
-        .card .value {
-            font-size: 24px;
-            font-weight: 600;
-        }
-
+        .card .value { font-size: 24px; font-weight: 600; }
         .card.balance .value { color: var(--accent); }
         .card.expense .value { color: var(--expense); }
 
@@ -87,13 +87,9 @@
             margin-bottom: 24px;
         }
 
-        .panel h2 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
+        .panel h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
 
-        form {
+        .add-form {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr auto;
             gap: 12px;
@@ -124,7 +120,7 @@
             border-color: var(--accent);
         }
 
-        button {
+        .add-form button {
             background: var(--accent);
             color: #0f1419;
             border: none;
@@ -135,14 +131,9 @@
             cursor: pointer;
         }
 
-        button:hover {
-            background: var(--accent-dim);
-        }
+        .add-form button:hover { background: var(--accent-dim); }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+        table { width: 100%; border-collapse: collapse; }
 
         th {
             text-align: left;
@@ -168,56 +159,70 @@
             font-weight: 600;
         }
 
-        .tag.income {
-            background: rgba(62, 207, 142, 0.15);
-            color: var(--accent);
+        .tag.income { background: rgba(62, 207, 142, 0.15); color: var(--accent); }
+        .tag.expense { background: rgba(91, 155, 213, 0.15); color: var(--expense); }
+
+        .delete-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 12px;
+            cursor: pointer;
         }
 
-        .tag.expense {
-            background: rgba(91, 155, 213, 0.15);
-            color: var(--expense);
+        .delete-btn:hover { color: var(--text); border-color: var(--text-dim); }
+
+        .empty {
+            color: var(--text-dim);
+            font-size: 14px;
+            padding: 8px 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Expense Tracker</h1>
-            <p>Know exactly where your money goes.</p>
+            <div>
+                <h1>PivotSpend</h1>
+                <p>Know exactly where your money goes.</p>
+            </div>
+            <a href="/logout" class="logout">Log out</a>
         </header>
 
         <div class="summary">
             <div class="card balance">
                 <div class="label">Balance</div>
-                <div class="value">₦0.00</div>
+                <div class="value">₦{{ "{:,.2f}".format(balance) }}</div>
             </div>
             <div class="card">
                 <div class="label">Total Income</div>
-                <div class="value">₦0.00</div>
+                <div class="value">₦{{ "{:,.2f}".format(total_income) }}</div>
             </div>
             <div class="card expense">
                 <div class="label">Total Expenses</div>
-                <div class="value">₦0.00</div>
+                <div class="value">₦{{ "{:,.2f}".format(total_expense) }}</div>
             </div>
         </div>
 
         <div class="panel">
             <h2>Add Transaction</h2>
-            <form>
+            <form class="add-form" method="POST" action="/add_transaction">
                 <div class="field">
                     <label>Type</label>
-                    <select>
+                    <select name="type">
                         <option value="income">Income</option>
                         <option value="expense">Expense</option>
                     </select>
                 </div>
                 <div class="field">
                     <label>Amount</label>
-                    <input type="number" placeholder="0.00">
+                    <input type="number" name="amount" step="0.01" min="0.01" placeholder="0.00" required>
                 </div>
                 <div class="field">
                     <label>Description</label>
-                    <input type="text" placeholder="e.g. Groceries">
+                    <input type="text" name="description" placeholder="e.g. Groceries" required>
                 </div>
                 <button type="submit">Add</button>
             </form>
@@ -225,6 +230,7 @@
 
         <div class="panel">
             <h2>All Transactions</h2>
+            {% if transactions %}
             <table>
                 <thead>
                     <tr>
@@ -232,17 +238,28 @@
                         <th>Amount</th>
                         <th>Description</th>
                         <th>Date</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
+                    {% for t in transactions %}
                     <tr>
-                        <td><span class="tag income">Income</span></td>
-                        <td>₦150,000.00</td>
-                        <td>Stipend</td>
-                        <td>2026-10-02</td>
+                        <td><span class="tag {{ t['type'] }}">{{ t['type']|capitalize }}</span></td>
+                        <td>₦{{ "{:,.2f}".format(t['amount']) }}</td>
+                        <td>{{ t['description'] }}</td>
+                        <td>{{ t['date'] }}</td>
+                        <td>
+                            <form method="POST" action="/delete_transaction/{{ t['id'] }}">
+                                <button type="submit" class="delete-btn">Delete</button>
+                            </form>
+                        </td>
                     </tr>
+                    {% endfor %}
                 </tbody>
             </table>
+            {% else %}
+            <p class="empty">No transactions yet. Add your first one above.</p>
+            {% endif %}
         </div>
     </div>
 </body>
