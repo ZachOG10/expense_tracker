@@ -1,44 +1,61 @@
 import os
-import sqlite3
+import math
+from contextlib import contextmanager
 from datetime import datetime
+
+import psycopg2
+import psycopg2.extras
+import psycopg2.errors
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-me")
 
-DATABASE = "pivotspend.db"
+SECRET_KEY = os.environ.get("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY is not set")
+app.secret_key = SECRET_KEY
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
-def get_db():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
-    return conn
+DATABASE_URL = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set")
+
+@contextmanager
+def db_cursor():
+    conn = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
+    try:
+        cur = conn.cursor()
+        yield cur
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 def init_db():
-    conn = get_db()
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            surname TEXT NOT NULL,
-            middle_name TEXT,
-            last_name TEXT NOT NULL,
-            email TEXT NOT NULL UNIQUE,
-            password_hash TEXT NOT NULL
-        )
-    """)
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS transactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            type TEXT NOT NULL,
-            amount REAL NOT NULL,
-            description TEXT NOT NULL,
-            date TEXT NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users (id)
-        )
-    """)
-    conn.commit()
-    conn.close()
+    with db_cursor() as cur:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                surname TEXT NOT NULL,
+                middle_name TEXT,
+                last_name TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE,
+                password_hash TEXT NOT NULL
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS transactions (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users (id),
+                type TEXT NOT NULL,
+                amount NUMERIC(14, 2) NOT NULL,
+                description TEXT NOT NULL,
+                date TEXT NOT NULL
+            )
+        """)
 
 init_db()
 
@@ -55,23 +72,21 @@ def signup():
         email = request.form["email"].strip().lower()
         password = request.form["password"]
 
-        conn = get_db()
-        existing = conn.execute(
-            "SELECT id FROM users WHERE email = ?", (email,)
-        ).fetchone()
-
-        if existing:
-            conn.close()
-            return render_template("signup.html", error="Email already registered")
+        if len(password) < 8:
+            return render_template("signup.html", error="Password must be at least 8 characters")
 
         hashed = generate_password_hash(password)
-        conn.execute(
-            "INSERT INTO users (surname, middle_name, last_name, email, password_hash) "
-            "VALUES (?, ?, ?, ?, ?)",
-            (surname, middle_name, last_name, email, hashed),
-        )
-        conn.commit()
-        conn.close()
+
+        try:
+            with db_cursor() as cur:
+                cur.execute(
+                    "INSERT INTO users (surname, middle_name, last_name, email, password_hash) "
+                    "VALUES (%s, %s, %s, %s, %s)",
+                    (surname, middle_name, last_name, email, hashed),
+                )
+        except psycopg2.errors.UniqueViolation:
+            return render_template("signup.html", error="Email already registered")
+
         return redirect(url_for("login"))
 
     return render_template("signup.html")
@@ -82,11 +97,9 @@ def login():
         email = request.form["email"].strip().lower()
         password = request.form["password"]
 
-        conn = get_db()
-        user = conn.execute(
-            "SELECT * FROM users WHERE email = ?", (email,)
-        ).fetchone()
-        conn.close()
+        with db_cursor() as cur:
+            cur.execute("SELECT id, password_hash FROM users WHERE email = %s", (email,))
+            user = cur.fetchone()
 
         if user and check_password_hash(user["password_hash"], password):
             session["user_id"] = user["id"]
@@ -107,13 +120,13 @@ def dashboard():
     if user_id is None:
         return redirect(url_for("login"))
 
-    conn = get_db()
-    transactions = conn.execute(
-        "SELECT id, type, amount, description, date FROM transactions "
-        "WHERE user_id = ? ORDER BY id DESC",
-        (user_id,),
-    ).fetchall()
-    conn.close()
+    with db_cursor() as cur:
+        cur.execute(
+            "SELECT id, type, amount, description, date FROM transactions "
+            "WHERE user_id = %s ORDER BY id DESC",
+            (user_id,),
+        )
+        transactions = cur.fetchall()
 
     total_income = sum(t["amount"] for t in transactions if t["type"] == "income")
     total_expense = sum(t["amount"] for t in transactions if t["type"] == "expense")
@@ -137,23 +150,28 @@ def add_transaction():
     description = request.form["description"].strip()
 
     try:
-        amount = float(request.form["amount"])
+        amount = round(float(request.form["amount"]), 2)
     except ValueError:
         return redirect(url_for("dashboard"))
 
-    if transaction_type not in ("income", "expense") or amount <= 0 or description == "":
+    if (
+        transaction_type not in ("income", "expense")
+        or not math.isfinite(amount)
+        or amount <= 0
+        or amount > 999_999_999
+        or description == ""
+    ):
         return redirect(url_for("dashboard"))
 
     today = datetime.now().strftime("%Y-%m-%d")
 
-    conn = get_db()
-    conn.execute(
-        "INSERT INTO transactions (user_id, type, amount, description, date) "
-        "VALUES (?, ?, ?, ?, ?)",
-        (user_id, transaction_type, amount, description, today),
-    )
-    conn.commit()
-    conn.close()
+    with db_cursor() as cur:
+        cur.execute(
+            "INSERT INTO transactions (user_id, type, amount, description, date) "
+            "VALUES (%s, %s, %s, %s, %s)",
+            (user_id, transaction_type, amount, description, today),
+        )
+
     return redirect(url_for("dashboard"))
 
 @app.route("/delete_transaction/<int:transaction_id>", methods=["POST"])
@@ -162,15 +180,13 @@ def delete_transaction(transaction_id):
     if user_id is None:
         return redirect(url_for("login"))
 
-    conn = get_db()
-    conn.execute(
-        "DELETE FROM transactions WHERE id = ? AND user_id = ?",
-        (transaction_id, user_id),
-    )
-    conn.commit()
-    conn.close()
+    with db_cursor() as cur:
+        cur.execute(
+            "DELETE FROM transactions WHERE id = %s AND user_id = %s",
+            (transaction_id, user_id),
+        )
+
     return redirect(url_for("dashboard"))
 
 if __name__ == "__main__":
     app.run(debug=True)
-    
